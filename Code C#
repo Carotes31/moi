@@ -1,7 +1,7 @@
 using System;
-using Ulysse1;
 
 namespace Ulysse1;
+
 class Monstre
 {
     public string test = "jean";
