@@ -1,0 +1,55 @@
+using System;
+using Ulysse1;
+
+namespace Ulysse1;
+class Monstre
+{
+    public string test = "jean";
+    public int PV;
+    public string nom;
+    public int force;
+    public string tdm;
+    //tdm = type de montres;
+    public void Attaquer(Survivant cible)
+    {
+        cible.PV -= force;
+        Console.WriteLine($"{test}c'est fais attaquer");
+        Console.Write("Il pert 5 PV");
+    }
+}
+class Survivant
+{
+    public int PV;
+    public string nom;
+    public int force;
+    public string ndf;
+    //ndf = nom de famille;
+}
+public static class Program
+{
+    public static void Main()
+    {
+        Survivant joueur1 = new Survivant();
+        joueur1.PV = 160;
+        joueur1.nom = "Ulysse";
+        joueur1.ndf = "Rincé";
+        joueur1.force = 20;
+        Monstre joueur2 = new Monstre();
+        joueur2.PV = 100;
+        joueur2.nom = "Blork";
+        joueur2.tdm = "Blork";
+        joueur2.force = 10;
+        bool idk = true;
+        // idk = je sais pas , je l'utilise pour afficher tout le temps la vie de joueur1;
+        while (idk == true)
+        {
+            Console.WriteLine(joueur1.PV);
+        }
+        joueur2.Attaquer(joueur1);
+
+
+
+
+    }
+
+}
