@@ -1,1 +1,7 @@
-// ...
+import system
+import random
+
+name = input()
+
+life = 3
+
