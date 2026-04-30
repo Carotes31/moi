@@ -1,7 +1,56 @@
-import system
-import random
+import time
+import sys
 
-name = input()
+name = input("Entre ton prénom : ")
+print(f"Salut {name} \nComment vas-tu ?")
 
-life = 3
+a1 = True
+while a1 == True:
+    humeur = input("Ta réponse : ")
+    if humeur == "je vais bien" or humeur == "ça va" or humeur == "ca va bien":
+        print("Trop Cool !")
+        a1 = False
+                                    
+    elif humeur == "je vais mal" or humeur == "je vais pas bien":
+        print("Désolé pour toi")
+        a1 = False
+    else:
+        print("Je n'ai pas compris\nReessaie")
 
+print(f"Je vais maintenant te faire passer un Quiz {name}, \nTu es d'accord ?")
+
+confirmation = input("Ta réponse : ")
+
+if confirmation == "Oui" or confirmation == "oui":
+
+    print(f"Ok {name}, c'est parti !")
+                                        
+else:
+
+    print(f"Dommage {name}, une prochaine fois.\nAu revoir")
+    time.sleep(3)
+    sys.exit()
+
+score = 0
+
+print("Question 1 du quizz :\nQuelle est la capitale du Portugal ?") 
+Q1 = input("Ta réponse : ")
+
+if Q1.lower() == "lisbonne":
+    print(f"Super {name}, tu as réussi")
+    score += 1
+else:
+    print(f"Raté {name}, la prochaine fois peut-être")
+
+print("Question 2 :")
+print("Quelle est la date de la revolution Française ??")
+Q2 = input("Ta reponse:")
+if Q2 ==1789:
+    print(f"Super tu a reussi {name}")
+    score += 1
+else:
+    print(f"Raté desolé {name}")
+if score > 0:
+    print(f"Super {name} tu a récolté {score} points")
+else:
+    print(f"désolé {name} tu a récolté que {score} points")
