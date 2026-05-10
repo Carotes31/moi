@@ -10,11 +10,16 @@
             padding: 0;
             font-family: Arial, sans-serif;
         }
+        #haut {
+
+
+        }
     </style>
 </head>
 <body>
+<div id="haut">
+<strong>❤️Bonne anniversaire❤️</strong>
 <div>
-<strong>❤️Bonne anniversaire ❤️</strong>
-<div>
+<img src=""></img>
 </body>
 </html>
