@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++ EXERCISES // CAROTES</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff88;
+    --green-dim: #00aa55;
+    --green-dark: #003322;
+    --amber: #ffaa00;
+    --red: #ff4444;
+    --bg: #050e08;
+    --panel: #080f0b;
+    --border: #1a3a28;
+    --text: #c8f0d8;
+    --text-dim: #4a7a5a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanlines overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* CRT flicker */
+  @keyframes flicker {
+    0%,100% { opacity: 1; }
+    97% { opacity: 1; }
+    97.5% { opacity: 0.85; }
+    98% { opacity: 1; }
+  }
+  body { animation: flicker 8s infinite; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px 20px;
+    position: relative;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(18px, 4vw, 32px);
+    font-weight: 900;
+    color: var(--green);
+    text-shadow: 0 0 20px rgba(0,255,136,0.5), 0 0 40px rgba(0,255,136,0.2);
+    letter-spacing: 4px;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .header-tags {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border: 1px solid var(--green-dim);
+    color: var(--green-dim);
+    letter-spacing: 1px;
+  }
+
+  .progress-bar-container {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-label { font-size: 11px; color: var(--text-dim); }
+
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    max-width: 300px;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  .progress-count { font-size: 11px; color: var(--green); min-width: 50px; }
+
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 36px 0 16px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--green-dim);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover::before { opacity: 1; }
+  .card:hover { border-color: #2a5a3a; }
+
+  .card.solved { border-color: var(--green-dim); }
+  .card.solved::before { opacity: 1; background: var(--green); }
+
+  .card-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .card-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--green-dim);
+    min-width: 30px;
+    padding-top: 1px;
+  }
+
+  .card-title {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .card-title .topic {
+    font-size: 10px;
+    color: var(--text-dim);
+    display: block;
+    margin-top: 2px;
+    letter-spacing: 1px;
+  }
+
+  .card-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .diff {
+    font-size: 9px;
+    padding: 2px 6px;
+    letter-spacing: 1px;
+    border: 1px solid;
+  }
+  .diff.easy { color: var(--green-dim); border-color: var(--green-dim); }
+  .diff.med  { color: var(--amber); border-color: var(--amber); }
+  .diff.hard { color: var(--red); border-color: var(--red); }
+
+  .chevron {
+    color: var(--text-dim);
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+  .card.open .chevron { transform: rotate(90deg); }
+
+  .solved-badge {
+    font-size: 14px;
+    display: none;
+  }
+  .card.solved .solved-badge { display: inline; }
+
+  .card-body {
+    display: none;
+    padding: 0 18px 18px 62px;
+    border-top: 1px solid var(--border);
+  }
+  .card.open .card-body { display: block; }
+
+  .enonce {
+    margin: 14px 0 10px;
+    line-height: 1.7;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .enonce strong { color: var(--green); }
+
+  .example-block {
+    background: #060d09;
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 12px;
+  }
+
+  .example-block .label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .example-block pre {
+    color: var(--amber);
+    white-space: pre-wrap;
+  }
+
+  .hint-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    margin-top: 8px;
+    margin-right: 8px;
+  }
+  .hint-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+  .hint-box {
+    display: none;
+    background: #0a120c;
+    border: 1px solid #2a4a1a;
+    padding: 10px 14px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--amber);
+    line-height: 1.6;
+  }
+  .hint-box.visible { display: block; }
+
+  .solution-box {
+    display: none;
+    margin-top: 10px;
+  }
+  .solution-box.visible { display: block; }
+
+  .solution-box pre {
+    background: #060d09;
+    border: 1px solid var(--border);
+    padding: 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* Syntax highlight classes */
+  .kw { color: #88ddff; }
+  .type { color: #ffcc66; }
+  .fn { color: var(--green); }
+  .str { color: #ff9966; }
+  .num { color: #cc99ff; }
+  .cmt { color: var(--text-dim); }
+  .op { color: var(--text); }
+
+  .solve-btn {
+    background: none;
+    border: 1px solid var(--green-dim);
+    color: var(--green-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    margin-top: 8px;
+  }
+  .solve-btn:hover { background: var(--green-dark); border-color: var(--green); color: var(--green); }
+  .card.solved .solve-btn { opacity: 0.4; pointer-events: none; }
+
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    letter-spacing: 2px;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .cursor { animation: blink 1s step-end infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>C++ DRILL</h1>
+    <span class="subtitle">// EXERCICES NIVEAU BASE<span class="cursor">_</span></span>
+  </div>
+  <div class="header-tags">
+    <span class="tag">VARIABLES</span>
+    <span class="tag">CONDITIONS</span>
+    <span class="tag">BOUCLES</span>
+    <span class="tag">FONCTIONS</span>
+  </div>
+  <div class="progress-bar-container">
+    <span class="progress-label">PROGRESSION</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-count" id="progressCount">0 / 10</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- VARIABLES -->
+  <div class="section-header">
+    <span class="section-title">§01 — Variables & Arithmétique</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- EXO 1 -->
+  <div class="card" id="card1">
+    <div class="card-header" onclick="toggle(1)">
+      <span class="card-num">01</span>
+      <div class="card-title">
+        Calculer l'aire d'un rectangle
+        <span class="topic">int, opérateurs arithmétiques</span>
+      </div>
+      <div class="card-right">
+        <span class="diff easy">EASY</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Déclare deux variables <strong>int</strong> : <strong>largeur = 7</strong> et <strong>hauteur = 4</strong>.<br>
+        Calcule l'<strong>aire</strong> et affiche-la avec <code>cout</code>.<br><br>
+        Résultat attendu :
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT</div>
+        <pre>Aire = 28</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(1)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(1)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(1)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint1">
+        Aire d'un rectangle = largeur × hauteur.<br>
+        Utilise <code>int aire = largeur * hauteur;</code>
+      </div>
+      <div class="solution-box" id="sol1">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">int</span> largeur = <span class="num">7</span>;
+    <span class="type">int</span> hauteur  = <span class="num">4</span>;
+    <span class="type">int</span> aire     = largeur * hauteur;
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Aire = "</span> <span class="op">&lt;&lt;</span> aire <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXO 2 -->
+  <div class="card" id="card2">
+    <div class="card-header" onclick="toggle(2)">
+      <span class="card-num">02</span>
+      <div class="card-title">
+        Conversion Celsius → Fahrenheit
+        <span class="topic">float, formule mathématique</span>
+      </div>
+      <div class="card-right">
+        <span class="diff easy">EASY</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Déclare un <strong>float celsius = 100.0</strong>.<br>
+        Convertis en Fahrenheit avec la formule : <strong>F = C × 9/5 + 32</strong><br>
+        Affiche le résultat.
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT</div>
+        <pre>100 C = 212 F</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(2)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(2)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(2)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint2">
+        Attention : en C++, <code>9/5</code> avec des <strong>int</strong> donne 1 (division entière).<br>
+        Écris <code>9.0/5.0</code> ou utilise un <code>float</code>.
+      </div>
+      <div class="solution-box" id="sol2">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">float</span> celsius    = <span class="num">100.0</span>;
+    <span class="type">float</span> fahrenheit = celsius * <span class="num">9.0</span> / <span class="num">5.0</span> + <span class="num">32</span>;
+    cout <span class="op">&lt;&lt;</span> celsius <span class="op">&lt;&lt;</span> <span class="str">" C = "</span> <span class="op">&lt;&lt;</span> fahrenheit <span class="op">&lt;&lt;</span> <span class="str">" F"</span> <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONDITIONS -->
+  <div class="section-header">
+    <span class="section-title">§02 — Conditions</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- EXO 3 -->
+  <div class="card" id="card3">
+    <div class="card-header" onclick="toggle(3)">
+      <span class="card-num">03</span>
+      <div class="card-title">
+        Pair ou Impair
+        <span class="topic">if / else, opérateur modulo %</span>
+      </div>
+      <div class="card-right">
+        <span class="diff easy">EASY</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Déclare un <strong>int n = 17</strong>.<br>
+        Affiche <strong>"pair"</strong> si n est pair, <strong>"impair"</strong> sinon.<br>
+        Teste avec plusieurs valeurs.
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT pour n = 17</div>
+        <pre>17 est impair</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(3)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(3)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(3)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint3">
+        Le modulo <code>%</code> donne le reste de la division.<br>
+        Si <code>n % 2 == 0</code> → pair. Sinon → impair.
+      </div>
+      <div class="solution-box" id="sol3">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">int</span> n = <span class="num">17</span>;
+    <span class="kw">if</span> (n % <span class="num">2</span> == <span class="num">0</span>)
+        cout <span class="op">&lt;&lt;</span> n <span class="op">&lt;&lt;</span> <span class="str">" est pair"</span> <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">else</span>
+        cout <span class="op">&lt;&lt;</span> n <span class="op">&lt;&lt;</span> <span class="str">" est impair"</span> <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXO 4 -->
+  <div class="card" id="card4">
+    <div class="card-header" onclick="toggle(4)">
+      <span class="card-num">04</span>
+      <div class="card-title">
+        Maximum de trois nombres
+        <span class="topic">if / else if / else</span>
+      </div>
+      <div class="card-right">
+        <span class="diff easy">EASY</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Déclare trois <strong>int</strong> : <strong>a = 12</strong>, <strong>b = 47</strong>, <strong>c = 31</strong>.<br>
+        Trouve et affiche le plus grand des trois.
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT</div>
+        <pre>Max = 47</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(4)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(4)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(4)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint4">
+        Compare d'abord a et b pour trouver le plus grand des deux,<br>
+        puis compare ce résultat avec c.
+      </div>
+      <div class="solution-box" id="sol4">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">int</span> a = <span class="num">12</span>, b = <span class="num">47</span>, c = <span class="num">31</span>;
+    <span class="type">int</span> max;
+    <span class="kw">if</span> (a >= b &amp;&amp; a >= c)
+        max = a;
+    <span class="kw">else if</span> (b >= a &amp;&amp; b >= c)
+        max = b;
+    <span class="kw">else</span>
+        max = c;
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Max = "</span> <span class="op">&lt;&lt;</span> max <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXO 5 -->
+  <div class="card" id="card5">
+    <div class="card-header" onclick="toggle(5)">
+      <span class="card-num">05</span>
+      <div class="card-title">
+        Mention au bac
+        <span class="topic">if / else if chaîné, opérateurs &&</span>
+      </div>
+      <div class="card-right">
+        <span class="diff med">MED</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Déclare un <strong>float note = 14.5</strong>.<br>
+        Affiche la mention correspondante :<br>
+        &nbsp;• &lt; 10 → <strong>"Recalé"</strong><br>
+        &nbsp;• 10–12 → <strong>"Passable"</strong><br>
+        &nbsp;• 12–14 → <strong>"Assez bien"</strong><br>
+        &nbsp;• 14–16 → <strong>"Bien"</strong><br>
+        &nbsp;• ≥ 16 → <strong>"Très bien"</strong>
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT pour 14.5</div>
+        <pre>Mention : Bien</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(5)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(5)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(5)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint5">
+        Utilise des <code>else if</code> en cascade.<br>
+        Pour vérifier un intervalle : <code>note >= 12 &amp;&amp; note &lt; 14</code>.<br>
+        Ou plus simple : vérifie les seuils dans l'ordre avec juste <code>else if (note >= X)</code>.
+      </div>
+      <div class="solution-box" id="sol5">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">float</span> note = <span class="num">14.5</span>;
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Mention : "</span>;
+    <span class="kw">if</span>      (note >= <span class="num">16</span>) cout <span class="op">&lt;&lt;</span> <span class="str">"Tres bien"</span>;
+    <span class="kw">else if</span> (note >= <span class="num">14</span>) cout <span class="op">&lt;&lt;</span> <span class="str">"Bien"</span>;
+    <span class="kw">else if</span> (note >= <span class="num">12</span>) cout <span class="op">&lt;&lt;</span> <span class="str">"Assez bien"</span>;
+    <span class="kw">else if</span> (note >= <span class="num">10</span>) cout <span class="op">&lt;&lt;</span> <span class="str">"Passable"</span>;
+    <span class="kw">else</span>                 cout <span class="op">&lt;&lt;</span> <span class="str">"Recale"</span>;
+    cout <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOUCLES -->
+  <div class="section-header">
+    <span class="section-title">§03 — Boucles</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- EXO 6 -->
+  <div class="card" id="card6">
+    <div class="card-header" onclick="toggle(6)">
+      <span class="card-num">06</span>
+      <div class="card-title">
+        Table de multiplication
+        <span class="topic">boucle for</span>
+      </div>
+      <div class="card-right">
+        <span class="diff easy">EASY</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Affiche la table de multiplication de <strong>7</strong> (de 1 à 10).
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT</div>
+        <pre>7 x 1  =  7
+7 x 2  = 14
+...
+7 x 10 = 70</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(6)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(6)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(6)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint6">
+        <code>for (int i = 1; i &lt;= 10; i++)</code><br>
+        Dans la boucle, affiche <code>7 * i</code>.
+      </div>
+      <div class="solution-box" id="sol6">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i <= <span class="num">10</span>; i++) {
+        cout <span class="op">&lt;&lt;</span> <span class="str">"7 x "</span> <span class="op">&lt;&lt;</span> i <span class="op">&lt;&lt;</span> <span class="str">" = "</span> <span class="op">&lt;&lt;</span> <span class="num">7</span> * i <span class="op">&lt;&lt;</span> endl;
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXO 7 -->
+  <div class="card" id="card7">
+    <div class="card-header" onclick="toggle(7)">
+      <span class="card-num">07</span>
+      <div class="card-title">
+        Somme de 1 à N
+        <span class="topic">boucle for, accumulateur</span>
+      </div>
+      <div class="card-right">
+        <span class="diff easy">EASY</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Calcule la somme de tous les entiers de <strong>1 à 100</strong> avec une boucle.<br>
+        Affiche le résultat. (Bonus : vérifie avec la formule N×(N+1)/2)
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT</div>
+        <pre>Somme = 5050</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(7)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(7)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(7)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint7">
+        Crée une variable <code>somme = 0</code> avant la boucle.<br>
+        Dans la boucle : <code>somme += i;</code> (équivalent à <code>somme = somme + i</code>)
+      </div>
+      <div class="solution-box" id="sol7">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">int</span> somme = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i <= <span class="num">100</span>; i++) {
+        somme += i;
+    }
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Somme = "</span> <span class="op">&lt;&lt;</span> somme <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXO 8 -->
+  <div class="card" id="card8">
+    <div class="card-header" onclick="toggle(8)">
+      <span class="card-num">08</span>
+      <div class="card-title">
+        Triangle d'étoiles
+        <span class="topic">boucles imbriquées for</span>
+      </div>
+      <div class="card-right">
+        <span class="diff med">MED</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Affiche un triangle d'étoiles de <strong>5 lignes</strong>.<br>
+        Ligne 1 → 1 étoile, ligne 2 → 2 étoiles, etc.
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT</div>
+        <pre>*
+**
+***
+****
+*****</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(8)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(8)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(8)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint8">
+        Tu as besoin de deux boucles : une pour les lignes (i de 1 à 5),<br>
+        et une à l'intérieur pour afficher <code>i</code> étoiles.<br>
+        N'oublie pas le <code>endl</code> après chaque ligne.
+      </div>
+      <div class="solution-box" id="sol8">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i <= <span class="num">5</span>; i++) {
+        <span class="kw">for</span> (<span class="type">int</span> j = <span class="num">0</span>; j < i; j++) {
+            cout <span class="op">&lt;&lt;</span> <span class="str">"*"</span>;
+        }
+        cout <span class="op">&lt;&lt;</span> endl;
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- FONCTIONS -->
+  <div class="section-header">
+    <span class="section-title">§04 — Fonctions</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- EXO 9 -->
+  <div class="card" id="card9">
+    <div class="card-header" onclick="toggle(9)">
+      <span class="card-num">09</span>
+      <div class="card-title">
+        Fonction puissance
+        <span class="topic">fonctions, paramètres, return</span>
+      </div>
+      <div class="card-right">
+        <span class="diff med">MED</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Écris une fonction <strong>puissance(base, exposant)</strong> qui retourne base<sup>exposant</sup>.<br>
+        Teste avec <strong>2⁸</strong> et <strong>3⁴</strong>.
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT</div>
+        <pre>2^8 = 256
+3^4 = 81</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(9)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(9)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(9)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint9">
+        La fonction reçoit deux <code>int</code> et retourne un <code>int</code>.<br>
+        Utilise une boucle : multiplie <code>base</code> par lui-même <code>exposant</code> fois.<br>
+        Commence avec un résultat = 1.
+      </div>
+      <div class="solution-box" id="sol9">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">puissance</span>(<span class="type">int</span> base, <span class="type">int</span> exp) {
+    <span class="type">int</span> resultat = <span class="num">1</span>;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < exp; i++) {
+        resultat *= base;
+    }
+    <span class="kw">return</span> resultat;
+}
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    cout <span class="op">&lt;&lt;</span> <span class="str">"2^8 = "</span> <span class="op">&lt;&lt;</span> <span class="fn">puissance</span>(<span class="num">2</span>, <span class="num">8</span>) <span class="op">&lt;&lt;</span> endl;
+    cout <span class="op">&lt;&lt;</span> <span class="str">"3^4 = "</span> <span class="op">&lt;&lt;</span> <span class="fn">puissance</span>(<span class="num">3</span>, <span class="num">4</span>) <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXO 10 -->
+  <div class="card" id="card10">
+    <div class="card-header" onclick="toggle(10)">
+      <span class="card-num">10</span>
+      <div class="card-title">
+        FizzBuzz
+        <span class="topic">boucle + conditions + modulo — classique entretien</span>
+      </div>
+      <div class="card-right">
+        <span class="diff hard">HARD</span>
+        <span class="solved-badge">✓</span>
+        <span class="chevron">▶</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="enonce">
+        Affiche les nombres de <strong>1 à 30</strong>. Mais :<br>
+        &nbsp;• Multiple de <strong>3</strong> → affiche <strong>"Fizz"</strong><br>
+        &nbsp;• Multiple de <strong>5</strong> → affiche <strong>"Buzz"</strong><br>
+        &nbsp;• Multiple de <strong>15</strong> → affiche <strong>"FizzBuzz"</strong><br>
+        &nbsp;• Sinon → affiche le nombre
+      </div>
+      <div class="example-block">
+        <div class="label">// OUTPUT (extrait)</div>
+        <pre>1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz 13 14 FizzBuzz ...</pre>
+      </div>
+      <button class="hint-btn" onclick="toggleHint(10)">[ INDICE ]</button>
+      <button class="hint-btn" onclick="toggleSolution(10)">[ SOLUTION ]</button>
+      <button class="solve-btn" onclick="markSolved(10)">[ MARQUER RÉSOLU ]</button>
+      <div class="hint-box" id="hint10">
+        Vérifie le cas <code>% 15 == 0</code> <strong>en premier</strong> (avant 3 et 5),<br>
+        sinon tu afficheras "Fizz" au lieu de "FizzBuzz" pour les multiples de 15.
+      </div>
+      <div class="solution-box" id="sol10">
+        <pre><span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i <= <span class="num">30</span>; i++) {
+        <span class="kw">if</span>      (i % <span class="num">15</span> == <span class="num">0</span>) cout <span class="op">&lt;&lt;</span> <span class="str">"FizzBuzz"</span>;
+        <span class="kw">else if</span> (i % <span class="num">3</span>  == <span class="num">0</span>) cout <span class="op">&lt;&lt;</span> <span class="str">"Fizz"</span>;
+        <span class="kw">else if</span> (i % <span class="num">5</span>  == <span class="num">0</span>) cout <span class="op">&lt;&lt;</span> <span class="str">"Buzz"</span>;
+        <span class="kw">else</span>                   cout <span class="op">&lt;&lt;</span> i;
+        cout <span class="op">&lt;&lt;</span> <span class="str">" "</span>;
+    }
+    cout <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="footer">C++ DRILL v1.0 // 10 EXERCICES // VARIABLES · CONDITIONS · BOUCLES · FONCTIONS</div>
+
+<script>
+  const TOTAL = 10;
+  const solved = new Set();
+
+  function toggle(n) {
+    const card = document.getElementById('card' + n);
+    card.classList.toggle('open');
+  }
+
+  function toggleHint(n) {
+    document.getElementById('hint' + n).classList.toggle('visible');
+  }
+
+  function toggleSolution(n) {
+    document.getElementById('sol' + n).classList.toggle('visible');
+  }
+
+  function markSolved(n) {
+    solved.add(n);
+    document.getElementById('card' + n).classList.add('solved');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const count = solved.size;
+    document.getElementById('progressFill').style.width = (count / TOTAL * 100) + '%';
+    document.getElementById('progressCount').textContent = count + ' / ' + TOTAL;
+  }
+</script>
+</body>
+</html>
